@@ -1,0 +1,6 @@
+<h1>Media Server</h1>
+<ul>
+{{range .}}
+	<li><a href="/vid?p={{.FilePath}}">{{.FileName}}</li>
+{{end}}
+</ul>
