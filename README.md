@@ -4,10 +4,18 @@ Media Server for streaming videos over local network written in Go. It has no
 dependencies other than the Go standard library.
 
 ## Build
-To build in your computer, clone this repository and in the root directory
-execute: 
+To build in your computer, first clone this repository into your Go path
 
 ```
+cd $GOPATH
+git clone https://github.com/GAumala/MediaServer
+```
+
+Once you have the repository in your computer go to the root directory and 
+use the `build` command.
+
+```
+cd MediaServer
 go build MediaServer.go
 ```
 

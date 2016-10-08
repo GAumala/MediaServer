@@ -14,7 +14,7 @@ import (
 
 var videos []data.VideoDir
 var ipAddr string
-const debug = true
+const debug = false
 const port = ":8080"
 
 func getProjectDir() string {
