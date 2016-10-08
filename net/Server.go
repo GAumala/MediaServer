@@ -5,16 +5,16 @@ import (
     "log"
     "html/template"
     "net/http"
-    "sort"
+    //"sort"
     "path/filepath"
     "os"
 
     "MediaServer/data"
 )
 
-var videos []data.VideoInfo
+var videos []data.VideoDir
 var ipAddr string
-const debug = false
+const debug = true
 const port = ":8080"
 
 func getProjectDir() string {
@@ -49,11 +49,15 @@ func videoHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func videoPathExists(videoPath string) bool {
+    /*
     totalVideos := len(videos)
+    dirName := path.filepath.DirName(videoPath)
     expectedPos := sort.Search(len(videos), func(index int) bool {
         return videos[index].FilePath >= videoPath
     })
     return expectedPos < totalVideos
+    */
+    return true
 }
 
 func initIpAddr() (ip string) {
@@ -65,7 +69,7 @@ func initIpAddr() (ip string) {
     return
 }
 
-func RunServer(vidSlice []data.VideoInfo){
+func RunServer(vidSlice []data.VideoDir){
     videos = vidSlice
     ipAddr = initIpAddr()
     log.Println("Running media server at: http://" + ipAddr + port)

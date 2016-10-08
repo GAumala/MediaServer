@@ -8,6 +8,7 @@ import (
     "os/user"
     "path"
     "path/filepath"
+    "sort"
 
     "MediaServer/data"
 )
@@ -21,18 +22,25 @@ func getDefaultVideoDir() string {
     return usr.HomeDir + "/Videos/"
 }
 
-func findVideosInPath(root string, vids []data.VideoInfo) []data.VideoInfo {
+func findVideosInPath(root string, vids []data.VideoDir) []data.VideoDir {
     log.Println("looking for videos in: " + root)
+    dirMap := make(map[string][]data.VideoInfo)
     filepath.Walk(root,
         func(pathStr string, info os.FileInfo, err error) error {
         if(data.IsStreamableVideoFormat(path.Ext(pathStr))) {
             log.Printf("found: %s\n", pathStr)
             name := path.Base(pathStr)
-            vids = append(vids, data.VideoInfo{pathStr, name})
+            dir := filepath.Dir(pathStr)
+            dirMap[dir] = append(dirMap[dir], data.VideoInfo{pathStr, name})
         }
         return err
     })
 
+    for key, value := range dirMap {
+        vids = append(vids, data.VideoDir{key, value})
+    }
+
+    sort.Sort(data.VideoDirectories(vids))
     return vids
 }
 
@@ -49,10 +57,10 @@ func getPathsToWalk(jsonFile string) []string {
     return []string{getDefaultVideoDir()}
 }
 
-func FindAllVideos(jsonFile string) []data.VideoInfo {
+func FindAllVideos(jsonFile string) []data.VideoDir {
     pathsToWalk := getPathsToWalk(jsonFile)
 
-    vids := make([]data.VideoInfo, 0, 0)
+    vids := make([]data.VideoDir, 0, 0)
     for _, pathStr := range pathsToWalk {
         vids = findVideosInPath(pathStr, vids)
     }
