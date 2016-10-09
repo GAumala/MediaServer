@@ -1,13 +1,9 @@
 package net
 
 import (
-    //"fmt"
     "log"
     "html/template"
     "net/http"
-    //"sort"
-    "path/filepath"
-    "os"
 
     "MediaServer/data"
 )
@@ -17,28 +13,9 @@ var ipAddr string
 var debug bool
 const port = ":8080"
 
-func getProjectDir() string {
-    pwd, err := filepath.Abs(filepath.Dir(os.Args[0]))
-     if err != nil {
-             log.Fatal(err)
-     }
-     return pwd
-}
 
 func getHTML(templateName string) string{
-    var pwd string
-    if(debug) {
-        /*
-        debug == true means that this process started with go run MediaServer.go
-        in such scenario getProjectDir() returns a temp directory which does
-        not have the html templates. We can't get the absolute path of our
-        Project directory, so let's return this instead.
-        */
-        return "public/" + templateName
-    }
-    pwd = getProjectDir()
-    log.Println(pwd + "/public/" + templateName)
-    return pwd + "/public/" + templateName
+    return getPublicDir() + templateName
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
@@ -65,6 +42,7 @@ func streamHandler(w http.ResponseWriter, r *http.Request) {
         http.NotFound(w, r)
     }
 }
+
 
 func videoHandler(w http.ResponseWriter, r *http.Request) {
     pathStr := r.URL.Query().Get("p")
@@ -99,6 +77,10 @@ func RunServer(goDebug bool, vidSlice []data.VideoDir){
     mux := http.NewServeMux()
     mux.Handle("/", http.HandlerFunc(indexHandler))
     mux.Handle("/vid", http.HandlerFunc(videoHandler))
+
+    mux.Handle("/" + videojs, http.HandlerFunc(assetsHandler))
+    mux.Handle("/" + videocss, http.HandlerFunc(assetsHandler))
+
     mux.Handle("/watch", http.HandlerFunc(streamHandler))
     http.ListenAndServe(port, mux)
 

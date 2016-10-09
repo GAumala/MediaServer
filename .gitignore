@@ -24,5 +24,10 @@ _testmain.go
 *.prof
 
 *.json
+
+#Assets
+public/video-js.css
+public/video.js
+
 # Executable file
 MediaServer

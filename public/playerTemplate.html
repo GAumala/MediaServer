@@ -1,6 +1,10 @@
-<div>
-  <video width="720" controls>
+<head>
+  <link href="/video-js.css" rel="stylesheet">
+</head>
+<body>
+  <video width="720" height="480" class="video-js" controls data-setup="{}">
     <source src="/vid?p={{.FilePath}}" type="video/mp4">
     Your browser does not support HTML5 video.
   </video>
-</div>
+  <script src="/video.js"></script>
+</body>

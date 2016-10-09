@@ -1,10 +1,19 @@
 # MediaServer
 
-Media Server for streaming videos over local network written in Go. It has no
-dependencies other than the Go standard library.
+Media Server for streaming videos over local network written in Go. The server
+has no dependencies other than the Go standard library. The web client uses
+[Video.js](http://videojs.com/)
 
 ## Build
-To build in your computer, first clone this repository into your Go path
+Currently, only Linux is supported. To build in your computer, you need to have
+installed all the build dependencies:
+
+- git
+- go
+- make
+- wget
+
+Once you have everything installed, clone this repository into your Go path.
 
 ```
 cd $GOPATH/src
@@ -12,14 +21,15 @@ git clone https://github.com/GAumala/MediaServer
 ```
 
 Once you have the repository in your computer go to the root directory and
-use the `build` command.
+use the `make` command.
 
 ```
 cd MediaServer
-go build MediaServer.go
+make
 ```
 
-This command creates an executable named `MediaServer`. As long as the `public`
+This command downloads the necessary Video.js files if they are missing and
+creates an executable named `MediaServer`. As long as the `public`
 folder is its same directory it will work properly.
 
 ## Usage
@@ -62,16 +72,3 @@ with the HTML5 `video` tag. In those browsers, change your URL to
 [localhost:8080/?player=1](http://localhost:8080/?player=1). With this URL, the
 links point to an HTML file with a `video` tag instead of a raw video resource
 file.
-
-## Development
-
-To test your local changes to the MediaServer go to the root directory of the
-repository and use the `run` command.
-
-```
-GODEBUG=1 go run MediaServer.go
-```
-
-The `GODEBUG` must be used because `run` creates an executable on a different
-directory, so it doesn't have access to the HTML templates in the `public`
-directory.
