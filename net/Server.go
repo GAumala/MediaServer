@@ -12,9 +12,9 @@ import (
     "MediaServer/data"
 )
 
-var videos []data.VideoDir
+var videos data.VideoDirectories
 var ipAddr string
-const debug = false
+var debug bool
 const port = ":8080"
 
 func getProjectDir() string {
@@ -25,9 +25,15 @@ func getProjectDir() string {
      return pwd
 }
 
-func getHtml(templateName string) string{
+func getHTML(templateName string) string{
     var pwd string
     if(debug) {
+        /*
+        debug == true means that this process started with go run MediaServer.go
+        in such scenario getProjectDir() returns a temp directory which does
+        not have the html templates. We can't get the absolute path of our
+        Project directory, so let's return this instead.
+        */
         return "public/" + templateName
     }
     pwd = getProjectDir()
@@ -36,47 +42,64 @@ func getHtml(templateName string) string{
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
-    t, _ := template.ParseFiles(getHtml("listTemplate.html"))
+    indexTemplate := "listTemplate.html"
+
+    streamOnly := r.URL.Query().Get("player")
+    if(streamOnly == "1") {
+        indexTemplate = "streamListTemplate.html"
+    }
+
+    t, _ := template.ParseFiles(getHTML(indexTemplate))
     t.Execute(w, videos)
+}
+
+func streamHandler(w http.ResponseWriter, r *http.Request) {
+    pathStr := r.URL.Query().Get("p")
+    log.Println("requested: stream", pathStr)
+
+    reqVid := videos.FindVideo(pathStr)
+    if(reqVid.FilePath != "") {
+        t, _ := template.ParseFiles(getHTML("playerTemplate.html"))
+        t.Execute(w, reqVid)
+    } else {
+        http.NotFound(w, r)
+    }
 }
 
 func videoHandler(w http.ResponseWriter, r *http.Request) {
     pathStr := r.URL.Query().Get("p")
     log.Println("requested: ", pathStr)
-    if(videoPathExists(pathStr)) {
+
+    reqVid := videos.FindVideo(pathStr)
+    if(reqVid.FilePath != "") {
         http.ServeFile(w, r, pathStr)
+    } else {
+        http.NotFound(w, r)
     }
 }
 
-func videoPathExists(videoPath string) bool {
-    /*
-    totalVideos := len(videos)
-    dirName := path.filepath.DirName(videoPath)
-    expectedPos := sort.Search(len(videos), func(index int) bool {
-        return videos[index].FilePath >= videoPath
-    })
-    return expectedPos < totalVideos
-    */
-    return true
-}
-
-func initIpAddr() (ip string) {
+func initIPAddr() (ip string) {
     ip, err := externalIP()
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+        ip = "localhost"
 	}
-
     return
 }
 
-func RunServer(vidSlice []data.VideoDir){
+/*RunServer starts the HTTP server at port 8080 that will serve the videos
+* in vidSlice. The goDebug value should be true only during development.
+*/
+func RunServer(goDebug bool, vidSlice []data.VideoDir){
+    debug = goDebug
     videos = vidSlice
-    ipAddr = initIpAddr()
+    ipAddr = initIPAddr()
     log.Println("Running media server at: http://" + ipAddr + port)
 
     mux := http.NewServeMux()
     mux.Handle("/", http.HandlerFunc(indexHandler))
     mux.Handle("/vid", http.HandlerFunc(videoHandler))
+    mux.Handle("/watch", http.HandlerFunc(streamHandler))
     http.ListenAndServe(port, mux)
 
 }

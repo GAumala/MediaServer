@@ -2,8 +2,6 @@ package filesys
 
 import (
     "log"
-    //"io/ioutil"
-    //"encoding/json"
     "os"
     "os/user"
     "path"
@@ -57,6 +55,15 @@ func getPathsToWalk(jsonFile string) []string {
     return []string{getDefaultVideoDir()}
 }
 
+/*FindAllVideos Walks throug the specified directories in the provided jsonFile
+* looking for videos. if the jsonFile string is empty or an invalid path then
+* only the /home/$USER/Videos directory will be searched.
+* If the jsonFile string is an invalid path a waring will be logged.
+* All the found videos are grouped by the container directories using the
+* VideoDir struct.
+* A slice of all the directories containing videos is returned. The slice is
+* sorted using the directory path.
+*/
 func FindAllVideos(jsonFile string) []data.VideoDir {
     pathsToWalk := getPathsToWalk(jsonFile)
 

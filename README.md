@@ -53,3 +53,15 @@ execute:
 ./MediaServer paths.json
 ```
 
+## Development
+
+To test your local changes to the MediaServer go to the root directory of the 
+repository and use the `run` command.
+
+```
+GODEBUG=1 go run MediaServer.go
+```
+
+The `GODEBUG` must be used because `run` creates an executable on a different
+directory, so it doesn't have access to the HTML templates in the `public`
+directory. 

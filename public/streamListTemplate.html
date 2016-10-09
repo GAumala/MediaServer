@@ -1,0 +1,10 @@
+
+<h1>Media Server</h1>
+<ul>
+{{range .}}
+  <h3>{{.DirPath}}</h3>
+	{{range .Videos}}
+		<li style="margin-bottom: 8px;"><a href="/watch?p={{.FilePath}}">{{.FileName}}</a></li>
+	{{end}}
+{{end}}
+</ul>
