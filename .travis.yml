@@ -1,0 +1,11 @@
+language: go
+
+go:
+  - 1.8.x
+
+install:
+  - go get github.com/GAumala/MediaServer
+
+script:
+  - cd $GOPATH/src/github.com/GAumala/MediaServer
+  - make

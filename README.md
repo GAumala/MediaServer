@@ -1,5 +1,7 @@
 # MediaServer
 
+[![Build Status](https://travis-ci.org/GAumala/MediaServer.svg?branch=master)](https://travis-ci.org/GAumala/MediaServer)
+
 Media Server for streaming videos over local network written in Go. The server
 has no dependencies other than the Go standard library. The web client uses
 [Video.js](http://videojs.com/)
