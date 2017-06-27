@@ -5,7 +5,7 @@ import (
     "html/template"
     "net/http"
 
-    "MediaServer/data"
+    "github.com/GAumala/MediaServer/data"
 )
 
 var videos data.VideoDirectories

@@ -8,7 +8,7 @@ import (
     "path/filepath"
     "sort"
 
-    "MediaServer/data"
+    "github.com/GAumala/MediaServer/data"
 )
 
 func getDefaultVideoDir() string {

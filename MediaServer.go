@@ -2,8 +2,8 @@ package main
 
 import (
     "os"
-    "MediaServer/filesys"
-    "MediaServer/net"
+    "github.com/GAumala/MediaServer/filesys"
+    "github.com/GAumala/MediaServer/net"
 )
 
 func main() {

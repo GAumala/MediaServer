@@ -13,18 +13,17 @@ installed all the build dependencies:
 - make
 - wget
 
-Once you have everything installed, clone this repository into your Go path.
+Once you have everything installed, grab the code frome github.
 
 ```
-cd $GOPATH/src
-git clone https://github.com/GAumala/MediaServer
+go get github.com/GAumala/MediaServer
 ```
 
 Once you have the repository in your computer go to the root directory and
 use the `make` command.
 
 ```
-cd MediaServer
+cd $GOPATH/src/github.com/GAumala/MediaServer
 make
 ```
 
@@ -62,6 +61,8 @@ execute:
 ```
 ./MediaServer paths.json
 ```
+
+If you need more help about using this tool or how to manage your vide library checkout [the wiki](https://github.com/GAumala/MediaServer/wiki).
 
 ### Compatibility
 
