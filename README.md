@@ -44,34 +44,34 @@ You can start the server with:
 If you open your browser and visit [localhost:8080](http://localhost:8080) you
 will find a simple HTML file listing all your available videos. By default it
 will serve the .mp4 videos in the path `/home/<USER>/Videos`. If you want to
-change it. you can pass a json file as parameter with an array of absolute paths
-to directories of videos you want to serve. For example, you can create a
-`paths.json` file like this:
+configure things like the port or the directories where to find videos you can
+pass a JSON file as parameter:
 
 ```
-[
-  "/home/gabriel/Videos/",
-  "/home/gabriel/Downloads/",
-  "/home/gabriel/MEGAsync Downloads/"
-]
+{
+  "port": 5678,
+  "verbose": true,
+  "videoDirs": [ 
+    "~/Videos/",
+    "/home/gabriel/MEGAsync Downloads",
+    "~/Downloads/" ]
+}
 ```
 
-The file specifies 3 directories that should be scanned to serve videos:
-`~/Videos/`, `~/Downloads/`, and `~/MEGAsync Downloads/`. To use it just
-execute:
+The file specifies a custom port 5678 and 3 directories that should be scanned 
+to serve videos: `~/Videos/`, `~/Downloads/`, and `~/MEGAsync Downloads/`. To 
+use it just execute:
 
 ```
 ./MediaServer paths.json
 ```
 
-If you need more help about using this tool or how to manage your vide library checkout [the wiki](https://github.com/GAumala/MediaServer/wiki).
+If you need more help about using this tool or how to manage your video library checkout [the wiki](https://github.com/GAumala/MediaServer/wiki).
 
-### Compatibility
+### Raw files
 
-This assumes that your are running a browser capable of playing/downloading
-raw video files, such as Safari, Firefox or Google Chrome. Some browsers,
-like the PS4's web browser, don't support this, but they do support streaming
-with the HTML5 `video` tag. In those browsers, change your URL to
-[localhost:8080/?player=1](http://localhost:8080/?player=1). With this URL, the
-links point to an HTML file with a `video` tag instead of a raw video resource
-file.
+By default the videos are streamed in a web client using video.js. If you want
+to have access to the raw video files change your URL to [localhost:8080/?player=1](
+http://localhost:8080/?player=0). This is useful when you want to use different
+video players that support video streaming over network, such as mpv.
+

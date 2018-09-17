@@ -1,87 +1,95 @@
 package net
 
 import (
-    "log"
-    "html/template"
-    "net/http"
+	"fmt"
+	"html/template"
+	"log"
+	"net/http"
 
-    "github.com/GAumala/MediaServer/data"
+	"github.com/GAumala/MediaServer/data"
+	"github.com/GAumala/MediaServer/filesys"
 )
 
+var config *data.Config
 var videos data.VideoDirectories
-var ipAddr string
-var debug bool
-const port = ":8080"
 
-
-func getHTML(templateName string) string{
-    return getPublicDir() + templateName
+func loadTemplate(name string) *template.Template {
+	templatePath := getPublicFilePath(name)
+	t, err := template.ParseFiles(templatePath)
+	if err != nil {
+		log.Fatalln("Failed to load template at ", templatePath, ". Error:\n", err)
+	}
+	return t
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
-    indexTemplate := "listTemplate.html"
+	indexTemplate := "streamListTemplate.html"
 
-    streamOnly := r.URL.Query().Get("player")
-    if(streamOnly == "1") {
-        indexTemplate = "streamListTemplate.html"
-    }
+	streamOnly := r.URL.Query().Get("player")
+	if streamOnly == "0" {
+		indexTemplate = "listTemplate.html"
+	}
 
-    t, _ := template.ParseFiles(getHTML(indexTemplate))
-    t.Execute(w, videos)
+	videos = filesys.FindAllVideos(*config)
+
+	t := loadTemplate(indexTemplate)
+	t.Execute(w, videos)
 }
 
 func streamHandler(w http.ResponseWriter, r *http.Request) {
-    pathStr := r.URL.Query().Get("p")
-    log.Println("requested: stream", pathStr)
+	pathStr := r.URL.Query().Get("p")
+	if config.Verbose {
+		log.Println("requested: stream", pathStr)
+	}
 
-    reqVid := videos.FindVideo(pathStr)
-    if(reqVid.FilePath != "") {
-        t, _ := template.ParseFiles(getHTML("playerTemplate.html"))
-        t.Execute(w, reqVid)
-    } else {
-        http.NotFound(w, r)
-    }
+	reqVid := videos.FindVideo(pathStr)
+	if reqVid.FilePath != "" {
+		t := loadTemplate("playerTemplate.html")
+		t.Execute(w, reqVid)
+	} else {
+		http.NotFound(w, r)
+	}
 }
 
-
 func videoHandler(w http.ResponseWriter, r *http.Request) {
-    pathStr := r.URL.Query().Get("p")
-    log.Println("requested: ", pathStr)
+	pathStr := r.URL.Query().Get("p")
+	if config.Verbose {
+		log.Println("requested: ", pathStr)
+	}
 
-    reqVid := videos.FindVideo(pathStr)
-    if(reqVid.FilePath != "") {
-        http.ServeFile(w, r, pathStr)
-    } else {
-        http.NotFound(w, r)
-    }
+	reqVid := videos.FindVideo(pathStr)
+	if reqVid.FilePath != "" {
+		http.ServeFile(w, r, pathStr)
+	} else {
+		http.NotFound(w, r)
+	}
 }
 
 func initIPAddr() (ip string) {
-    ip, err := externalIP()
+	ip, err := externalIP()
 	if err != nil {
 		log.Println(err)
-        ip = "localhost"
+		ip = "localhost"
 	}
-    return
+	return
 }
 
-/*RunServer starts the HTTP server at port 8080 that will serve the videos
-* in vidSlice. The goDebug value should be true only during development.
-*/
-func RunServer(goDebug bool, vidSlice []data.VideoDir){
-    debug = goDebug
-    videos = vidSlice
-    ipAddr = initIPAddr()
-    log.Println("Running media server at: http://" + ipAddr + port)
+/*RunServer starts the HTTP server at port 8080 using the specified config.
+ */
+func RunServer(c *data.Config) {
+	config = c
+	ipAddr := initIPAddr()
+	portAddr := fmt.Sprintf(":%d", config.Port)
 
-    mux := http.NewServeMux()
-    mux.Handle("/", http.HandlerFunc(indexHandler))
-    mux.Handle("/vid", http.HandlerFunc(videoHandler))
+	fmt.Printf("Running media server at: http://%s%s\n", ipAddr, portAddr)
 
-    mux.Handle("/" + videojs, http.HandlerFunc(assetsHandler))
-    mux.Handle("/" + videocss, http.HandlerFunc(assetsHandler))
+	mux := http.NewServeMux()
+	mux.Handle("/", http.HandlerFunc(indexHandler))
+	mux.Handle("/vid", http.HandlerFunc(videoHandler))
 
-    mux.Handle("/watch", http.HandlerFunc(streamHandler))
-    http.ListenAndServe(port, mux)
+	mux.Handle("/"+videojs, http.HandlerFunc(assetsHandler))
+	mux.Handle("/"+videocss, http.HandlerFunc(assetsHandler))
 
+	mux.Handle("/watch", http.HandlerFunc(streamHandler))
+	log.Fatal(http.ListenAndServe(portAddr, mux))
 }

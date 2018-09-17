@@ -1,31 +1,37 @@
 package data
 
 import (
-    "path"
-    "path/filepath"
-    "sort"
+	"path"
+	"path/filepath"
+	"sort"
 )
-/*VideoDir type that represents a directory with videos.
+
+/*VideoDir type that represents a directory with Videos.
 * DirPath is an absolute path of the directory.
 * Videos is an array of VideoInfo structs. Each entry represents a video that
 * has the directory specified in DirPath as its direct parent directory.
-*/
+ */
 type VideoDir struct {
 	DirPath string
-    Videos []VideoInfo
+	Videos  []VideoInfo
 }
 
 //VideoDirectories is a type of an array of VideoDir. it implements the sort.Interface
 type VideoDirectories []VideoDir
 
 func (vd VideoDirectories) Len() int {
-    return len(vd)
+	return len(vd)
 }
 func (vd VideoDirectories) Swap(i, j int) {
-    vd[i], vd[j] = vd[j], vd[i]
+	vd[i], vd[j] = vd[j], vd[i]
 }
 func (vd VideoDirectories) Less(i, j int) bool {
-    return vd[i].DirPath < vd[j].DirPath
+	return vd[i].DirPath < vd[j].DirPath
+}
+
+// NewVideoDir is a public constructor for VideoDir
+func NewVideoDir(path string, Videos []VideoInfo) VideoDir {
+	return VideoDir{path, Videos}
 }
 
 /*FindVideo looks for a video specified with an absolute path pathStr inside
@@ -37,14 +43,14 @@ func (vd VideoDirectories) Less(i, j int) bool {
 * is returned.
 * All searches in slices are performed with the binary search algorithm of
 * the Search function of the package sort
-*/
+ */
 func (vd VideoDirectories) FindVideo(pathStr string) VideoInfo {
 	//First check if directory exists
 	target := filepath.Dir(pathStr)
 	length := vd.Len()
-	pos := sort.Search(length, func (i int) bool { return vd[i].DirPath >= target})
+	pos := sort.Search(length, func(i int) bool { return vd[i].DirPath >= target })
 
-	if(pos < length && vd[pos].DirPath == target) {//FOUND DIR
+	if pos < length && vd[pos].DirPath == target { //FOUND DIR
 		//Now check if a file with that name exists
 		videoDir := vd[pos]
 		length = len(videoDir.Videos)
@@ -53,7 +59,8 @@ func (vd VideoDirectories) FindVideo(pathStr string) VideoInfo {
 			return videoDir.Videos[i].FileName >= target
 		})
 
-		if(pos < length && videoDir.Videos[pos].FileName == target) {//FOUND FILE
+		if pos < length && videoDir.Videos[pos].FileName == target {
+			//FOUND FILE
 			return videoDir.Videos[pos]
 		}
 	}

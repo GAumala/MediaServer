@@ -1,58 +1,39 @@
 package filesys
 
 import (
-    "log"
-    "os"
-    "os/user"
-    "path"
-    "path/filepath"
-    "sort"
+	"log"
+	"os"
+	"path"
+	"path/filepath"
 
-    "github.com/GAumala/MediaServer/data"
+	"github.com/GAumala/MediaServer/data"
 )
 
-func getDefaultVideoDir() string {
-    usr, err := user.Current()
-    if err != nil {
-        log.Fatal(err)
-    }
+func findVideosInPath(verbose bool, root string) []data.VideoDir {
+	if verbose {
+		log.Println("looking for videos in: " + root)
+	}
 
-    return usr.HomeDir + "/Videos/"
-}
+	dirMap := make(map[string][]data.VideoInfo)
 
-func findVideosInPath(root string, vids []data.VideoDir) []data.VideoDir {
-    log.Println("looking for videos in: " + root)
-    dirMap := make(map[string][]data.VideoInfo)
-    filepath.Walk(root,
-        func(pathStr string, info os.FileInfo, err error) error {
-        if(data.IsStreamableVideoFormat(path.Ext(pathStr))) {
-            log.Printf("found: %s\n", pathStr)
-            name := path.Base(pathStr)
-            dir := filepath.Dir(pathStr)
-            dirMap[dir] = append(dirMap[dir], data.VideoInfo{pathStr, name})
-        }
-        return err
-    })
+	filepath.Walk(root,
+		func(pathStr string, info os.FileInfo, err error) error {
+			if data.IsStreamableVideoFormat(path.Ext(pathStr)) {
+				if verbose {
+					log.Printf("found: %s\n", pathStr)
+				}
+				name := path.Base(pathStr)
+				dir := filepath.Dir(pathStr)
+				dirMap[dir] = append(dirMap[dir], data.VideoInfo{pathStr, name})
+			}
+			return err
+		})
 
-    for key, value := range dirMap {
-        vids = append(vids, data.VideoDir{key, value})
-    }
-
-    sort.Sort(data.VideoDirectories(vids))
-    return vids
-}
-
-func getPathsToWalk(jsonFile string) []string {
-    if(jsonFile != "") {
-        jsonPaths, err := ParseJsonPathList(jsonFile)
-        if(err!= nil) {
-            log.Println(err)
-        } else {
-            return jsonPaths
-        }
-    }
-
-    return []string{getDefaultVideoDir()}
+	vids := []data.VideoDir{}
+	for dirPath, videos := range dirMap {
+		vids = append(vids, data.NewVideoDir(dirPath, videos))
+	}
+	return vids
 }
 
 /*FindAllVideos Walks throug the specified directories in the provided jsonFile
@@ -63,13 +44,11 @@ func getPathsToWalk(jsonFile string) []string {
 * VideoDir struct.
 * A slice of all the directories containing videos is returned. The slice is
 * sorted using the directory path.
-*/
-func FindAllVideos(jsonFile string) []data.VideoDir {
-    pathsToWalk := getPathsToWalk(jsonFile)
-
-    vids := make([]data.VideoDir, 0, 0)
-    for _, pathStr := range pathsToWalk {
-        vids = findVideosInPath(pathStr, vids)
-    }
-    return vids
+ */
+func FindAllVideos(config data.Config) data.VideoDirectories {
+	vids := make([]data.VideoDir, 0, 0)
+	for _, pathStr := range config.VideoDirs {
+		vids = append(vids, findVideosInPath(config.Verbose, pathStr)...)
+	}
+	return vids
 }
