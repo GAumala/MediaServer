@@ -1,6 +1,7 @@
 package filesys
 
 import (
+	"hash/fnv"
 	"log"
 	"os"
 	"path"
@@ -9,28 +10,40 @@ import (
 	"github.com/GAumala/MediaServer/data"
 )
 
-func findVideosInPath(verbose bool, root string) []data.VideoDir {
+func generateVideoKey(videoPath string) uint32 {
+	hash := fnv.New32()
+	hash.Write([]byte(videoPath))
+	return hash.Sum32()
+}
+
+func findVideosInPath(verbose bool, root string,
+	videoDict data.VideoDict) []data.VideoDir {
 	if verbose {
 		log.Println("looking for videos in: " + root)
 	}
 
-	dirMap := make(map[string][]data.VideoInfo)
+	dirDict := make(map[string][]data.VideoInfo)
 
 	filepath.Walk(root,
 		func(pathStr string, info os.FileInfo, err error) error {
 			if data.IsStreamableVideoFormat(path.Ext(pathStr)) {
-				if verbose {
-					log.Printf("found: %s\n", pathStr)
-				}
 				name := path.Base(pathStr)
 				dir := filepath.Dir(pathStr)
-				dirMap[dir] = append(dirMap[dir], data.VideoInfo{pathStr, name})
+				key := generateVideoKey(pathStr)
+				newVideo := data.VideoInfo{
+					FilePath: pathStr,
+					FileName: name,
+					Key:      key,
+				}
+
+				dirDict[dir] = append(dirDict[dir], newVideo)
+				videoDict[key] = newVideo
 			}
 			return err
 		})
 
 	vids := []data.VideoDir{}
-	for dirPath, videos := range dirMap {
+	for dirPath, videos := range dirDict {
 		vids = append(vids, data.NewVideoDir(dirPath, videos))
 	}
 	return vids
@@ -45,10 +58,11 @@ func findVideosInPath(verbose bool, root string) []data.VideoDir {
 * A slice of all the directories containing videos is returned. The slice is
 * sorted using the directory path.
  */
-func FindAllVideos(config data.Config) data.VideoDirectories {
-	vids := make([]data.VideoDir, 0, 0)
+func FindAllVideos(config data.Config) (data.VideoDirectories, data.VideoDict) {
+	dirs := make([]data.VideoDir, 0, 0)
+	videoDict := make(map[uint32]data.VideoInfo)
 	for _, pathStr := range config.VideoDirs {
-		vids = append(vids, findVideosInPath(config.Verbose, pathStr)...)
+		dirs = append(dirs, findVideosInPath(config.Verbose, pathStr, videoDict)...)
 	}
-	return vids
+	return dirs, videoDict
 }

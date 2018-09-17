@@ -5,13 +5,15 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/GAumala/MediaServer/data"
 	"github.com/GAumala/MediaServer/filesys"
 )
 
 var config *data.Config
-var videos data.VideoDirectories
+var videoList data.VideoDirectories
+var videoDict data.VideoDict
 
 func loadTemplate(name string) *template.Template {
 	templatePath := getPublicFilePath(name)
@@ -30,37 +32,59 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		indexTemplate = "listTemplate.html"
 	}
 
-	videos = filesys.FindAllVideos(*config)
+	videoList, videoDict = filesys.FindAllVideos(*config)
 
 	t := loadTemplate(indexTemplate)
-	t.Execute(w, videos)
+	t.Execute(w, videoList)
 }
 
 func streamHandler(w http.ResponseWriter, r *http.Request) {
-	pathStr := r.URL.Query().Get("p")
-	if config.Verbose {
-		log.Println("requested: stream", pathStr)
+	v := r.URL.Query().Get("v")
+	videoKey, err := strconv.ParseUint(v, 10, 32)
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 
-	reqVid := videos.FindVideo(pathStr)
+	reqVid := videoDict[uint32(videoKey)]
 	if reqVid.FilePath != "" {
+		if config.Verbose {
+			log.Println("Serving requested stream : ", videoKey)
+		}
+
 		t := loadTemplate("playerTemplate.html")
 		t.Execute(w, reqVid)
 	} else {
+		if config.Verbose {
+			log.Println("Unable to find requested stream : ", videoKey)
+		}
+
 		http.NotFound(w, r)
 	}
 }
 
 func videoHandler(w http.ResponseWriter, r *http.Request) {
-	pathStr := r.URL.Query().Get("p")
-	if config.Verbose {
-		log.Println("requested: ", pathStr)
+	v := r.URL.Query().Get("v")
+	videoKey, err := strconv.ParseUint(v, 10, 32)
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 
-	reqVid := videos.FindVideo(pathStr)
+	reqVid := videoDict[uint32(videoKey)]
 	if reqVid.FilePath != "" {
-		http.ServeFile(w, r, pathStr)
+		if config.Verbose {
+			log.Println("Serving requested raw video: ", videoKey)
+		}
+
+		http.ServeFile(w, r, reqVid.FilePath)
 	} else {
+		if config.Verbose {
+			log.Println("Unable to find requested raw video: ", videoKey)
+		}
+
 		http.NotFound(w, r)
 	}
 }

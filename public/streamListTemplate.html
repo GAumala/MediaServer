@@ -4,7 +4,7 @@
 {{range .}}
   <h3>{{.DirPath}}</h3>
 	{{range .Videos}}
-		<li style="margin-bottom: 8px;"><a href="/watch?p={{.FilePath}}">{{.FileName}}</a></li>
+		<li style="margin-bottom: 8px;"><a href="/watch?v={{.Key}}">{{.FileName}}</a></li>
 	{{end}}
 {{end}}
 </ul>

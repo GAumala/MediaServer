@@ -1,13 +1,21 @@
 package data
 
 /*VideoInfo type that describes a video to stream
-* FilePath contains the absolute path to the video file
-* FileName contains the name of the file.
+* FilePath is the absolute path to the video file.
+* FileName is the name of the video file.
+* Key is a string that uniquely identifies a video file with URL friendly
+* characters.
  */
 type VideoInfo struct {
 	FilePath string
 	FileName string
+	Key      uint32
 }
+
+/* VideoDict is a map whose keys are unique 32 bit integers that uniquely
+ * identify videos in the filesystem.
+ */
+type VideoDict map[uint32]VideoInfo
 
 var videoFormats = [2]string{".mp4", ".webm"}
 

@@ -1,11 +1,5 @@
 package data
 
-import (
-	"path"
-	"path/filepath"
-	"sort"
-)
-
 /*VideoDir type that represents a directory with Videos.
 * DirPath is an absolute path of the directory.
 * Videos is an array of VideoInfo structs. Each entry represents a video that
@@ -32,38 +26,4 @@ func (vd VideoDirectories) Less(i, j int) bool {
 // NewVideoDir is a public constructor for VideoDir
 func NewVideoDir(path string, Videos []VideoInfo) VideoDir {
 	return VideoDir{path, Videos}
-}
-
-/*FindVideo looks for a video specified with an absolute path pathStr inside
-* the VideoDirectories struct.
-* First it checks if the VideoDirectories struct contains the directory of the
-* video. if it succeeds the it gets the VideoDir struct representing that
-* directory and checks if there is a VideoInfo struct with that absolute path.
-* If the VideoInfo struct is found, it is returned, otherwise an empty struct
-* is returned.
-* All searches in slices are performed with the binary search algorithm of
-* the Search function of the package sort
- */
-func (vd VideoDirectories) FindVideo(pathStr string) VideoInfo {
-	//First check if directory exists
-	target := filepath.Dir(pathStr)
-	length := vd.Len()
-	pos := sort.Search(length, func(i int) bool { return vd[i].DirPath >= target })
-
-	if pos < length && vd[pos].DirPath == target { //FOUND DIR
-		//Now check if a file with that name exists
-		videoDir := vd[pos]
-		length = len(videoDir.Videos)
-		target = path.Base(pathStr)
-		pos = sort.Search(length, func(i int) bool {
-			return videoDir.Videos[i].FileName >= target
-		})
-
-		if pos < length && videoDir.Videos[pos].FileName == target {
-			//FOUND FILE
-			return videoDir.Videos[pos]
-		}
-	}
-
-	return VideoInfo{}
 }
