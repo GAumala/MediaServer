@@ -47,23 +47,23 @@ will serve the .mp4 videos in the path `/home/<USER>/Videos`. If you want to
 configure things like the port or the directories where to find videos you can
 pass a JSON file as parameter:
 
-```
+``` JSON
 {
   "port": 5678,
   "verbose": true,
   "videoDirs": [ 
-    "~/Videos/",
-    "/home/gabriel/MEGAsync Downloads",
-    "~/Downloads/" ]
+    "/home/gabriel/Videos/",
+    "MEGAsync Downloads",
+    "/home/gabriel/Downloads/" 
+  ]
 }
 ```
 
 The file specifies a custom port 5678 and 3 directories that should be scanned 
-to serve videos: `~/Videos/`, `~/Downloads/`, and `~/MEGAsync Downloads/`. To 
-use it just execute:
+to serve videos. To use it just execute:
 
 ```
-./MediaServer paths.json
+./MediaServer myConfig.json
 ```
 
 If you need more help about using this tool or how to manage your video library checkout [the wiki](https://github.com/GAumala/MediaServer/wiki).
