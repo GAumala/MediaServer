@@ -28,7 +28,7 @@ func getPublicFilePath(templateFileName string) string {
 func assetsHandler(w http.ResponseWriter, r *http.Request) {
 	requestedAsset := r.URL.Path
 	if requestedAsset == "/"+videojs {
-		http.ServeFile(w, r, (videojs))
+		http.ServeFile(w, r, getPublicFilePath(videojs))
 	} else if requestedAsset == "/"+videocss {
 		http.ServeFile(w, r, getPublicFilePath(videocss))
 	} else {
