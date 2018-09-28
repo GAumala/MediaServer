@@ -1,6 +1,7 @@
 package filesys
 
 import (
+	"fmt"
 	"hash/fnv"
 	"log"
 	"os"
@@ -10,10 +11,10 @@ import (
 	"github.com/GAumala/MediaServer/data"
 )
 
-func generateVideoKey(videoPath string) uint32 {
+func generateVideoKey(videoPath string) string {
 	hash := fnv.New32()
 	hash.Write([]byte(videoPath))
-	return hash.Sum32()
+	return fmt.Sprintf("%d%s", hash.Sum32(), filepath.Ext(videoPath))
 }
 
 func findVideosInPath(verbose bool, root string,
@@ -60,7 +61,7 @@ func findVideosInPath(verbose bool, root string,
  */
 func FindAllVideos(config data.Config) (data.VideoDirectories, data.VideoDict) {
 	dirs := make([]data.VideoDir, 0, 0)
-	videoDict := make(map[uint32]data.VideoInfo)
+	videoDict := make(map[string]data.VideoInfo)
 	for _, pathStr := range config.VideoDirs {
 		dirs = append(dirs, findVideosInPath(config.Verbose, pathStr, videoDict)...)
 	}

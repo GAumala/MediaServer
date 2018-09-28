@@ -9,13 +9,13 @@ package data
 type VideoInfo struct {
 	FilePath string
 	FileName string
-	Key      uint32
+	Key      string
 }
 
 /* VideoDict is a map whose keys are unique 32 bit integers that uniquely
  * identify videos in the filesystem.
  */
-type VideoDict map[uint32]VideoInfo
+type VideoDict map[string]VideoInfo
 
 var videoFormats = [2]string{".mp4", ".webm"}
 

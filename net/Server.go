@@ -5,7 +5,6 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"strconv"
 
 	"github.com/GAumala/MediaServer/data"
 	"github.com/GAumala/MediaServer/filesys"
@@ -40,24 +39,18 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 
 func streamHandler(w http.ResponseWriter, r *http.Request) {
 	v := r.URL.Query().Get("v")
-	videoKey, err := strconv.ParseUint(v, 10, 32)
 
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	reqVid := videoDict[uint32(videoKey)]
+	reqVid := videoDict[v]
 	if reqVid.FilePath != "" {
 		if config.Verbose {
-			log.Println("Serving requested stream : ", videoKey)
+			log.Println("Serving requested stream : ", v)
 		}
 
 		t := loadTemplate("playerTemplate.html")
 		t.Execute(w, reqVid)
 	} else {
 		if config.Verbose {
-			log.Println("Unable to find requested stream : ", videoKey)
+			log.Println("Unable to find requested stream : ", v)
 		}
 
 		http.NotFound(w, r)
@@ -66,23 +59,16 @@ func streamHandler(w http.ResponseWriter, r *http.Request) {
 
 func videoHandler(w http.ResponseWriter, r *http.Request) {
 	v := r.URL.Query().Get("v")
-	videoKey, err := strconv.ParseUint(v, 10, 32)
-
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	reqVid := videoDict[uint32(videoKey)]
+	reqVid := videoDict[v]
 	if reqVid.FilePath != "" {
 		if config.Verbose {
-			log.Println("Serving requested raw video: ", videoKey)
+			log.Println("Serving requested raw video: ", v)
 		}
 
 		http.ServeFile(w, r, reqVid.FilePath)
 	} else {
 		if config.Verbose {
-			log.Println("Unable to find requested raw video: ", videoKey)
+			log.Println("Unable to find requested raw video: ", v)
 		}
 
 		http.NotFound(w, r)
