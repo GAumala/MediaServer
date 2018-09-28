@@ -101,6 +101,7 @@ func RunServer(c *data.Config) {
 	ipAddr := initIPAddr()
 	portAddr := fmt.Sprintf(":%d", config.Port)
 
+	videoList, videoDict = filesys.FindAllVideos(*config)
 	fmt.Printf("Running media server at: http://%s%s\n", ipAddr, portAddr)
 
 	mux := http.NewServeMux()
