@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/GAumala/MediaServer/data"
 	"github.com/GAumala/MediaServer/filesys"
@@ -37,10 +38,10 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	t.Execute(w, videoList)
 }
 
-func streamHandler(w http.ResponseWriter, r *http.Request) {
+func htmlVideoHandler(w http.ResponseWriter, r *http.Request) {
 	v := r.URL.Query().Get("v")
 
-	reqVid := videoDict[v]
+       	reqVid := videoDict[v]
 	if reqVid.FilePath != "" {
 		if config.Verbose {
 			log.Println("Serving requested stream : ", v)
@@ -57,7 +58,7 @@ func streamHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func videoHandler(w http.ResponseWriter, r *http.Request) {
+func rawVideoHandler(w http.ResponseWriter, r *http.Request) {
 	v := r.URL.Query().Get("v")
 	reqVid := videoDict[v]
 	if reqVid.FilePath != "" {
@@ -73,6 +74,15 @@ func videoHandler(w http.ResponseWriter, r *http.Request) {
 
 		http.NotFound(w, r)
 	}
+}
+
+func watchHandler(w http.ResponseWriter, r *http.Request) {
+  acceptHeader := r.Header.Get("Accept")
+  if (strings.Contains(acceptHeader, "text/html")) {
+    htmlVideoHandler(w, r)
+  } else {
+    rawVideoHandler(w, r)
+  }
 }
 
 func initIPAddr() (ip string) {
@@ -95,11 +105,11 @@ func RunServer(c *data.Config) {
 
 	mux := http.NewServeMux()
 	mux.Handle("/", http.HandlerFunc(indexHandler))
-	mux.Handle("/vid", http.HandlerFunc(videoHandler))
 
 	mux.Handle("/"+videojs, http.HandlerFunc(assetsHandler))
 	mux.Handle("/"+videocss, http.HandlerFunc(assetsHandler))
 
-	mux.Handle("/watch", http.HandlerFunc(streamHandler))
+	mux.Handle("/watch", http.HandlerFunc(watchHandler))
+	mux.Handle("/vid", http.HandlerFunc(rawVideoHandler))
 	log.Fatal(http.ListenAndServe(portAddr, mux))
 }
