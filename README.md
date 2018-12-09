@@ -42,10 +42,21 @@ You can start the server with:
 ```
 
 If you open your browser and visit [localhost:8080](http://localhost:8080) you
-will find a simple HTML file listing all your available videos. By default it
-will serve the .mp4 videos in the path `/home/<USER>/Videos`. If you want to
-configure things like the port or the directories where to find videos you can
-pass a JSON file as parameter:
+will find a simple HTML file listing all your available videos.
+
+
+![screenshot from 2018-12-09 09-00-21](https://user-images.githubusercontent.com/5729175/49698430-ad3bb080-fb91-11e8-9047-abb3ea2b96c0.png)
+![screenshot from 2018-12-09 09-03-39](https://user-images.githubusercontent.com/5729175/49698431-ad3bb080-fb91-11e8-8f7d-7d27bf814d42.png)
+
+Notice that the url for watching a video could be something like 
+`http://localhost:8080/watch?v=99653847.mp4`. You should be able to copy that
+link into any player like vlc or mpv and stream it without issues.
+
+## Configuration
+
+By default it will serve the .mp4 videos in the path `/home/<USER>/Videos`. 
+If you want to configure things like the port or the directories where to find 
+videos you can pass a JSON file as parameter:
 
 ``` JSON
 {
@@ -70,8 +81,10 @@ If you need more help about using this tool or how to manage your video library 
 
 ### Raw files
 
-By default the videos are streamed in a web client using video.js. If you want
-to have access to the raw video files change your URL to [localhost:8080/?player=1](
-http://localhost:8080/?player=0). This is useful when you want to use different
-video players that support video streaming over network, such as mpv.
+By default the videos are streamed in a web client using video.js. The server
+will try to figure out whether to serve html or raw video files based on the 
+client request's `Accept` header. If you want to force the HTML list to show
+raw file links your URL to [localhost:8080/?player=0](
+http://localhost:8080/?player=0). This is useful when you have an unsupported
+video player.
 

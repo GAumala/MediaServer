@@ -17,7 +17,7 @@ type VideoInfo struct {
  */
 type VideoDict map[string]VideoInfo
 
-var videoFormats = [2]string{".mp4", ".webm"}
+var videoFormats = []string{".avi", ".mkv", ".mp4", ".webm", ".wmv"}
 
 /*IsStreamableVideoFormat returns true if the extension provided in videoExtension
 * is an extension of video format that can be streamed over HTML5.
