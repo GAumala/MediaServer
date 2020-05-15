@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sort"
 
 	"github.com/GAumala/MediaServer/data"
 )
@@ -60,10 +61,11 @@ func findVideosInPath(verbose bool, root string,
 * sorted using the directory path.
  */
 func FindAllVideos(config data.Config) (data.VideoDirectories, data.VideoDict) {
-	dirs := make([]data.VideoDir, 0, 0)
+	dirs := make(data.VideoDirectories, 0, 0)
 	videoDict := make(map[string]data.VideoInfo)
 	for _, pathStr := range config.VideoDirs {
 		dirs = append(dirs, findVideosInPath(config.Verbose, pathStr, videoDict)...)
 	}
+	sort.Sort(dirs)
 	return dirs, videoDict
 }

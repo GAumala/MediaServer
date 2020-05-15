@@ -19,10 +19,22 @@ func getProjectDir() string {
 	return pwd
 }
 
+func fileExists(filename string) bool {
+	info, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return !info.IsDir()
+}
+
 func getPublicFilePath(templateFileName string) string {
-	return path.Join(os.Getenv("GOPATH"),
+	filename := path.Join(os.Getenv("GOPATH"),
 		"src/github.com/GAumala/MediaServer/public/",
 		templateFileName)
+	if !fileExists(filename) { // Use executable file path if GOPATH not exists
+		filename = path.Join(getProjectDir(), "public/", templateFileName)
+	}
+	return filename
 }
 
 func assetsHandler(w http.ResponseWriter, r *http.Request) {
